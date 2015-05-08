@@ -1,0 +1,17 @@
+digraph G {
+0 -> -1 [color="#9ACEEB"];
+0 -> 2 [label = "-1:-1"];
+0 -> 2 [label = "-2:-2"];
+0 -> 2 [label = "-5:-5"];
+1 -> -1 [color="#9ACEEB"];
+2 -> 0 [color="#9ACEEB"];
+2 -> 3 [label = "ab"];
+2 -> 4 [label = "b"];
+2 -> 1 [label = "cb"];
+3 -> 4 [color="#9ACEEB"];
+3 -> 1 [label = "abcb"];
+3 -> 1 [label = "cb"];
+4 -> 2 [color="#9ACEEB"];
+4 -> 1 [label = "abcb"];
+4 -> 1 [label = "cb"];
+}

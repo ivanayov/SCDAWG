@@ -1,0 +1,31 @@
+Digraph A{ 
+rankdir=LR;
+node[shape = point, color = white]; "";
+node [shape = circle, color = black];
+"" -> 0;
+0 -> 1 [ label = "$" ];
+0 -> 2 [ label = "ab" ];
+0 -> 2 [ label = "b" ];
+0 -> 11 [ label = "cd" ];
+0 -> 11 [ label = "d" ];
+2 -> 11 [ label = "abcd" ];
+2 -> 11 [ label = "cd" ];
+3 -> 1 [ label = "$" ];
+3 -> 1 [ label = "ababcd$" ];
+4 -> 1 [ label = "$" ];
+4 -> 3 [ label = "ababcd" ];
+5 -> 1 [ label = "$" ];
+5 -> 4 [ label = "ababcd" ];
+6 -> 1 [ label = "$" ];
+6 -> 5 [ label = "ababcd" ];
+7 -> 1 [ label = "$" ];
+7 -> 6 [ label = "ababcd" ];
+8 -> 1 [ label = "$" ];
+8 -> 7 [ label = "ababcd" ];
+9 -> 1 [ label = "$" ];
+9 -> 8 [ label = "ababcd" ];
+10 -> 1 [ label = "$" ];
+10 -> 9 [ label = "ababcd" ];
+11 -> 1 [ label = "$" ];
+11 -> 10 [ label = "ababcd" ];
+}

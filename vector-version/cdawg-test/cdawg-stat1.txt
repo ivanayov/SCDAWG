@@ -1,0 +1,5 @@
+number of data symbols: 61
+symbol size: 1
+data size: 0.00 MB
+number of states: 12
+number of transitions: 25
