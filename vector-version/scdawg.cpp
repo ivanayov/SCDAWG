@@ -156,7 +156,7 @@ int main(int argc, char* argv[])
 
 //    free(text);
 
-//    searchToken();//TODO: Build the system so thai it would be used after without building again.
+//    searchToken();//TODO: Build the system so that it would be used after without building again.
 
 	return 0;
 }

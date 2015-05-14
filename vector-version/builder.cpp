@@ -51,15 +51,6 @@ void buildSCDAWG(int& textSize) {
 	do {
 		++i;
 
-        /* Not optimal !!! (TODO) */
-//        if (text[i] != '$') {
-//            for (int j = 0; j < openEdges.size(); ++j){
-////                cout << "openEdges[j] " << openEdges[j] << endl;
-//                edgesLabels[openEdges[j]][1] = *e;
-//            }
-//            vertexes[sink] = *e;
-//        }
-
 		int ki_pair[2] = {sk_pair[1], i};
 //		cout << "Before update:" << endl;
 //		cout << "s = " << sk_pair[0] << "ki_pair = (" << ki_pair[0] << "," << ki_pair[1] << ")" << endl;
