@@ -18,6 +18,22 @@ void addOpenEdge(int indexValue){
 //    cout << "Add open edge: " << indexValue << endl;
 }
 
+void duplicateVertex(int srcVertex, int resVertex){
+    int nextIndex = startIndexes[srcVertex];
+    int destination = -1;
+    int subword[2];
+
+    while (nextIndex != -1){
+        destination = edges[nextIndex];
+        if (destination != -1){
+            subword[0] = outgoingLabelsStartPos[nextIndex];
+            subword[1] = incomingLabelEndPos[destination];
+            addEdge(resVertex, subword, destination);
+            nextIndex = nextIndexes[nextIndex];
+        }
+    }
+}
+
 /*
  * Returns a pair of vertex's number and a int number.
  */
@@ -32,10 +48,10 @@ int* canonize(int sVertex, int kp_pair[]){
 		return sk_pair;
 	}
 
-    int edgeIndex = findLabelPosInEdgeList(kp_pair[0]);
-    int pprim = edgesLabels[sVertex * alphabetSize + edgeIndex][1];
-    int kprim = edgesLabels[sVertex * alphabetSize + edgeIndex][0];
-    int sp = edges[sVertex * alphabetSize + edgeIndex];
+    int edgeIndex = perfectHashSearch(text[kp_pair[0]], sVertex);
+    int sp = edges[edgeIndex];
+    int pprim = incomingLabelEndPos[sp];
+    int kprim = outgoingLabelsStartPos[edgeIndex];
 //    cout << "edgeIndex = " << edgeIndex << ", kprim = " << kprim
 //            << ", pprim = " << pprim << ", sp = " << sp << endl;
 
@@ -46,10 +62,10 @@ int* canonize(int sVertex, int kp_pair[]){
 		sVertex = sp;
 //        cout << "pprim " << pprim << ", kprim " << kprim << ", kp_pair[1] " << kp_pair[1] << ", k " << k << endl;
         if(k <= kp_pair[1]){
-            int sindex = findLabelPosInEdgeList(k);
-            pprim = edgesLabels[sVertex * alphabetSize + sindex][1];
-            kprim = edgesLabels[sVertex * alphabetSize + sindex][0];
-            sp = edges[sVertex * alphabetSize + sindex];
+            int sindex = perfectHashSearch(text[k], sVertex);
+            sp = edges[sindex];
+            pprim = incomingLabelEndPos[sp];
+            kprim = outgoingLabelsStartPos[sindex];
         }
 	}
 	sk_pair[0] = sVertex;
@@ -63,12 +79,12 @@ bool check_end_point(int sVertex, int kp_pair[], char c){
 //    cout << "----------------------- check_end_point:" << endl;
 //    cout << "sVertex = " << sVertex << " , kp_pair[0] = " << kp_pair[0] << " , kp_pair[1] = " << kp_pair[1] << " , c = " << c << endl;
 	if (kp_pair[0] <= kp_pair[1]) {
-        int edgeIndex = findLabelPosInEdgeList(kp_pair[0]);
+        int edgeIndex = perfectHashSearch(text[kp_pair[0]], sVertex);
 //        cout << (c == text[edgesLabels[sVertex * alphabetSize + edgeIndex][0] + kp_pair[1] - kp_pair[0] + 1]) << endl;
-		return (c == text[edgesLabels[sVertex * alphabetSize + edgeIndex][0] + kp_pair[1] - kp_pair[0] + 1]);
+		return (c == text[outgoingLabelsStartPos[edgeIndex] + kp_pair[1] - kp_pair[0] + 1]);
 	}
 	else {
-        bool test = egdeExists(sVertex, c);
+        //bool test = egdeExists(sVertex, c);
 //        cout << test << endl;
 //        cout << "-----------------------check_end_point-----------------------" << endl;
 		return egdeExists(sVertex, c);
@@ -84,21 +100,21 @@ int extension(int sVertex, int kp_pair[]){
     if (kp_pair[0] > kp_pair[1]){
         return sVertex;
     }
-    int edgeIndex = findLabelPosInEdgeList(kp_pair[0]);
+    int edgeIndex = perfectHashSearch(text[kp_pair[0]], sVertex);
 //    cout << "Res: edges[sVertex * alphabetSize + edgeIndex] = " << edges[sVertex * alphabetSize + edgeIndex] << endl;
 //    cout << "---------------- extension ------------------" << endl;
-    return edges[sVertex * alphabetSize + edgeIndex];
+    return edges[edgeIndex];
 }
 
 void redirectEdge(int sVertex, int kp_pair[], int rVertex){
 //    cout << "---------------- redirectEdge: ..." << endl;
 //    cout << "s = " << sVertex << " , kp_pair = (" << kp_pair[0] << "," << kp_pair[1] << ")" << " , r = "<< rVertex << endl;
-    int edgeIndex = findLabelPosInEdgeList(kp_pair[0]);
-    int subword[2] = {edgesLabels[sVertex * alphabetSize + edgeIndex][0],
-                        edgesLabels[sVertex * alphabetSize + edgeIndex][0] + kp_pair[1] - kp_pair[0]};
+    int edgeIndex = perfectHashSearch(text[kp_pair[0]], sVertex);
+    int subword[2] = {outgoingLabelsStartPos[edgeIndex],
+                        outgoingLabelsStartPos[edgeIndex] + kp_pair[1] - kp_pair[0]};
 
     replaceEdge(sVertex, subword, rVertex);
-    removeOpenEdge(sVertex * alphabetSize + edgeIndex);
+    removeOpenEdge(edgeIndex);
 //    cout << "redirected edge: source: " << sVertex << ", label: " << subword[0] << " , " << subword[1] << " dest: " << rVertex << endl;
 //
 //    cout << "---------------- redirectEdge ------------------" << endl;
@@ -109,32 +125,32 @@ void redirectEdge(int sVertex, int kp_pair[], int rVertex){
  */
 int split_edge(int sVertex, int kp_pair[]){
 //    cout << "---------------- split_edge: ..." << endl;
-    int edgeIndex = findLabelPosInEdgeList(kp_pair[0]);
+    int edgeIndex = perfectHashSearch(text[kp_pair[0]], sVertex);
 
     int rVertex = vertexesSize;
 	++vertexesSize;
 
-    int kprim = edgesLabels[sVertex * alphabetSize + edgeIndex][0];
-    int pprim = edgesLabels[sVertex * alphabetSize + edgeIndex][1];
-    int sp = edges[sVertex * alphabetSize + edgeIndex];
-    removeOpenEdge(sVertex * alphabetSize + edgeIndex);
+    int sp = edges[edgeIndex];
+    int kprim = outgoingLabelsStartPos[edgeIndex];
+    int pprim = incomingLabelEndPos[sp];
+    removeOpenEdge(edgeIndex);
 
 	int firstSubword[2] = {kprim, kprim + kp_pair[1] - kp_pair[0]};
 	int secondSubword[2] = {kprim + kp_pair[1] - kp_pair[0] + 1, pprim};
 
-    edgesLabels[sVertex * alphabetSize + edgeIndex][0] = firstSubword[0];
-    edgesLabels[sVertex * alphabetSize + edgeIndex][1] = firstSubword[1];
-    edges[sVertex * alphabetSize + edgeIndex] = rVertex;
+    outgoingLabelsStartPos[edgeIndex] = firstSubword[0];
+    edges[edgeIndex] = rVertex;
+    incomingLabelEndPos[rVertex] = firstSubword[1];
 //    cout << "(split) redirected edge: source: " << sVertex << ", label: " << firstSubword[0] << " , " << firstSubword[1] << " dest: " << rVertex << endl;
 
-    int edgeIndex2 = findLabelPosInEdgeList(secondSubword[0]);
-    edgesLabels[rVertex * alphabetSize + edgeIndex2][0] = secondSubword[0];
-    edgesLabels[rVertex * alphabetSize + edgeIndex2][1] = secondSubword[1];
-    edges[rVertex * alphabetSize + edgeIndex2] = sp;
-    addOpenEdge(rVertex * alphabetSize + edgeIndex2);
+    int edgeIndex2 = perfectHashSearch(text[secondSubword[0]], rVertex);
+    outgoingLabelsStartPos[edgeIndex2] = secondSubword[0];
+    edges[edgeIndex2] = sp;
+    incomingLabelEndPos[sp] = secondSubword[1];
+    addOpenEdge(edgeIndex2);
 //    cout << "(split) new edge: source: " << rVertex << ", label: " << secondSubword[0] << " , " << secondSubword[1] << " dest: " << sp << endl;
 
-    vertexes[rVertex] = vertexes[sVertex] + (kp_pair[1] - kp_pair[0] + 1);
+    lengths[rVertex] = lengths[sVertex] + (kp_pair[1] - kp_pair[0] + 1);
 //    cout << "Res: rVertex = " << rVertex << endl;
 //    cout << "---------------- split_edge ------------------" << endl;
 
@@ -154,7 +170,7 @@ int* separateNode(int sVertex, int kp_pair[]){
 //        cout << "---------------- separateNode ------------------" << endl;
         return sk_pair_can;
     }
-    if (vertexes[sk_pair_can[0]] == vertexes[sVertex] + kp_pair[1] - kp_pair[0] + 1){
+    if (lengths[sk_pair_can[0]] == lengths[sVertex] + kp_pair[1] - kp_pair[0] + 1){
 //        cout << "(Res): sk_pair_can = (" << sk_pair_can[0] << "," << sk_pair_can[1] << ")" << endl;
 //        cout << "---------------- separateNode ------------------" << endl;
         return sk_pair_can;
@@ -163,14 +179,11 @@ int* separateNode(int sVertex, int kp_pair[]){
 //    cout << "separate_node not tested case ..." << endl;
     int resVertex = vertexesSize;
 	++vertexesSize;
-    for (int i = 0; i < alphabetSize; ++i){
-        edges[resVertex * alphabetSize + i] = edges[sk_pair_can[0] * alphabetSize + i];
-        edgesLabels[resVertex * alphabetSize + i][0] = edgesLabels[sk_pair_can[0] * alphabetSize + i][0];
-        edgesLabels[resVertex * alphabetSize + i][1] = edgesLabels[sk_pair_can[0] * alphabetSize + i][1];
-    }
+
+	duplicateVertex(sk_pair_can[0], resVertex);
     suffixLinks[resVertex] = suffixLinks[sk_pair_can[0]];
     suffixLinks[sk_pair_can[0]] = resVertex;
-    vertexes[resVertex] = vertexes[sVertex] + (kp_pair[1] - kp_pair[0] + 1);
+    lengths[resVertex] = lengths[sVertex] + (kp_pair[1] - kp_pair[0] + 1);
 
 	int* sk_pair = (int*)malloc(2);
     sk_pair[0] = sVertex;
@@ -179,10 +192,12 @@ int* separateNode(int sVertex, int kp_pair[]){
 
     do {
         can_pair = canonize(sk_pair[0], kp_pair);
-        int edgeIndex = findLabelPosInEdgeList(kp_pair[0]);
-        edges[sk_pair[0] * alphabetSize + edgeIndex] = resVertex;
-        edgesLabels[sk_pair[0] * alphabetSize + edgeIndex][0] = kp_pair[0];
-        edgesLabels[sk_pair[0] * alphabetSize + edgeIndex][1] = kp_pair[1];
+        int edgeIndex = perfectHashSearch(text[kp_pair[0]], sk_pair[0]);
+        if (edgeIndex != -1) {
+            edges[edgeIndex] = resVertex;
+            outgoingLabelsStartPos[edgeIndex] = kp_pair[0];
+            incomingLabelEndPos[resVertex] = kp_pair[1];
+        }
 
         int kp_1_pair[2] = {kp_pair[0], kp_pair[1]-1};
         sk_pair = canonize(suffixLinks[sVertex], kp_1_pair);
@@ -251,16 +266,16 @@ int* update(int sVertex, int kp_pair[]) {
 		}
 //		cout << "rVertex = " << rVertex << endl;
 //        cout << "Create edge: ..." << endl;
-        int edgeIndex = findLabelPosInEdgeList(kp_pair[1]);
+        int edgeIndex = perfectHashSearch(text[kp_pair[1]], rVertex);
 //        cout << "edgeIndex = " << edgeIndex << endl;
 //        cout << "rVertex + edgeIndex = " << rVertex * alphabetSize + edgeIndex << endl;
-        edges[rVertex * alphabetSize + edgeIndex] = sink;
-        edgesLabels[rVertex * alphabetSize + edgeIndex][0] = kp_pair[1];
-        edgesLabels[rVertex * alphabetSize + edgeIndex][1] = text_size;
+        edges[edgeIndex] = sink;
+        outgoingLabelsStartPos[edgeIndex] = kp_pair[1];
+        incomingLabelEndPos[sink] = text_size;
 
 //        cout << "new edge: label: " << edgesLabels[rVertex * alphabetSize + edgeIndex][0] << " , "
 //        << edgesLabels[rVertex * alphabetSize + edgeIndex][1] << " dest: " << edges[rVertex * alphabetSize + edgeIndex] << endl;
-        addOpenEdge(rVertex * alphabetSize + edgeIndex);
+        addOpenEdge(edgeIndex);
 
         if (oldr != nullVertex){
             suffixLinks[oldr] = rVertex;

@@ -5,41 +5,45 @@ using namespace std;
 
 void buildSCDAWG(int& textSize) {
 
+    initialAlocation(transitionsSizeTypeAlloc);
+    initialAlocation(vertexesSizeTypeAlloc);
+    /*
     for (int i = 0; i < alphabetSize*500000; ++i){
         edges[i] = nullVertex;
         edgesLabels[i][0] = -1;
         edgesLabels[i][1] = -1;
     }
     for (int i = 0; i < 500000; ++i){
-        vertexes[i] = 0;
+        lengths[i] = 0;
         suffixLinks[i] = nullVertex;
-    }
+    }*/
 
     suffixLinks[root] = 9;
 	/*
 	 * Create nodes root and bottom
 	 */
 	for (int j=1; j < textSize; ++j) {
-        int edgeIndex = findLabelPosInEdgeList(j);
+        int edgeIndex = perfectHashSearch(text[j], bottom);
 //        cout << "edgeIndex: " << edgeIndex << endl;
 //        cout << "bottom + edgeIndex: " << bottom + edgeIndex << endl;
-        if (edges[bottom + edgeIndex] == nullVertex) {
-            edges[bottom + edgeIndex] = root;
+        if (edges[edgeIndex] == nullVertex) {
+            edges[edgeIndex] = root;
 //            cout << "dest: " << edges[bottom + edgeIndex] << endl;
-            edgesLabels[bottom + edgeIndex][0] = -j;
-            edgesLabels[bottom + edgeIndex][1] = -j;
+            /*** TODO: root is an exeption and has different incoming labels !!!!!!!!!!!!!!!!!!!! ***/
+            outgoingLabelsStartPos[edgeIndex] = -j;
+            incomingLabelEndPos[root] = -j;
 //            cout << "Label: " << edgesLabels[bottom + edgeIndex][0] << " , " << edgesLabels[bottom + edgeIndex][1] << endl;
         }
 	}
 
     suffixLinks[root] = bottom;
 //    cout << "suffixLinks[root] " << suffixLinks[root] << endl;
-    vertexes[bottom] = -1;
-//    cout << "vertexes[bottom] " << vertexes[bottom] << endl;
-    vertexes[root] = 0;
-//    cout << "vertexes[root] " << vertexes[root] << endl;
-    vertexes[sink] = 0;
-//    cout << "vertexes[sink] " << vertexes[sink] << endl;
+    lengths[bottom] = -1;
+//    cout << "lengths[bottom] " << lengths[bottom] << endl;
+    lengths[root] = 0;
+//    cout << "lengths[root] " << lengths[root] << endl;
+    lengths[sink] = 0;
+//    cout << "lengths[sink] " << lengths[sink] << endl;
 	/***********************************/
 
 	int* sk_pair = (int*)malloc(2);
