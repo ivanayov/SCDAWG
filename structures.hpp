@@ -23,7 +23,7 @@ class Vertex {
         Vertex(int vstart, int vend) {
             this.state_start = vstart;
             this.state_end = vend;
-            this.edgeList.elist.fillWilth(empty_edge); //TODO
+            this.edgeList.elist.fillWilth(empty_edge); //TODO - 
         }
 
         ~Vertex(){}
